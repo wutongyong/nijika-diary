@@ -1,0 +1,1818 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>虹夏日记 – 你的音乐伙伴的私密日志</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --sakura: #FFB7C5;
+      --sakura-light: #FFF0F3;
+      --sakura-dark: #D4849A;
+      --sunset: #FF9A76;
+      --sky: #87CEEB;
+      --sky-light: #E8F4FD;
+      --night: #2C3E50;
+      --cream: #FFF8F0;
+      --text: #2C3E50;
+      --text-light: #7F8C8D;
+      --border: #E8E0D8;
+      --shadow: rgba(44, 62, 80, 0.08);
+    }
+
+    body {
+      font-family: 'Noto Sans SC', sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.8;
+    }
+
+    .app-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 30px;
+      min-height: 100vh;
+    }
+
+    @media (max-width: 900px) {
+      .app-container { grid-template-columns: 1fr; }
+      .sidebar { position: static !important; }
+    }
+
+    .sidebar { position: sticky; top: 20px; height: fit-content; }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 2px 20px var(--shadow);
+      border: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .logo-section { text-align: center; margin-bottom: 16px; }
+
+    .logo-section .mascot {
+      font-size: 2.8em;
+      margin-bottom: 6px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    .logo-section h1 {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.6em;
+      color: var(--sakura-dark);
+      margin-bottom: 2px;
+    }
+
+    .logo-section .subtitle {
+      font-size: 0.82em;
+      color: var(--text-light);
+      font-weight: 300;
+    }
+
+    .character-card {
+      background: linear-gradient(135deg, var(--sakura-light), #FFF8F0);
+      border: 1px solid rgba(255, 183, 197, 0.3);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .character-card h3 {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 0.95em;
+      color: var(--sakura-dark);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .character-info {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 12px;
+      font-size: 0.78em;
+    }
+
+    .character-info .label { color: var(--text-light); font-weight: 500; }
+    .character-info .value { font-weight: 400; }
+
+    .character-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+
+    .char-tag {
+      background: rgba(255, 183, 197, 0.25);
+      color: var(--sakura-dark);
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.7em;
+      font-weight: 500;
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .calendar-header h3 {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.05em;
+      color: var(--night);
+    }
+
+    .calendar-nav { display: flex; gap: 6px; }
+
+    .calendar-nav button {
+      background: var(--sakura-light);
+      border: none;
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9em;
+      color: var(--sakura-dark);
+      transition: all 0.2s;
+    }
+
+    .calendar-nav button:hover { background: var(--sakura); color: white; }
+
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+
+    .calendar-day-label {
+      text-align: center;
+      font-size: 0.7em;
+      color: var(--text-light);
+      padding: 3px 0;
+      font-weight: 500;
+    }
+
+    .calendar-day {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.82em;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .calendar-day:hover { background: var(--sakura-light); }
+
+    .calendar-day.today {
+      font-weight: 700;
+      color: var(--sunset);
+      background: rgba(255, 154, 118, 0.08);
+    }
+
+    .calendar-day.has-diary::after {
+      content: '';
+      position: absolute;
+      bottom: 2px;
+      width: 5px;
+      height: 5px;
+      background: var(--sakura);
+      border-radius: 50%;
+    }
+
+    .calendar-day.selected { background: var(--sakura); color: white; }
+    .calendar-day.selected::after { background: white; }
+    .calendar-day.empty { cursor: default; }
+    .calendar-day.empty:hover { background: transparent; }
+
+    .mood-section h3 {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 0.95em;
+      margin-bottom: 10px;
+      color: var(--night);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mood-fields { display: flex; flex-direction: column; gap: 10px; }
+
+    .field-group { display: flex; flex-direction: column; gap: 4px; }
+
+    .field-group label {
+      font-size: 0.8em;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    .field-group input,
+    .field-group textarea {
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 0.88em;
+      transition: border-color 0.3s;
+      outline: none;
+      width: 100%;
+    }
+
+    .field-group input:focus,
+    .field-group textarea:focus { border-color: var(--sakura); }
+
+    .field-group textarea { resize: vertical; min-height: 50px; }
+
+    .mood-btn {
+      background: linear-gradient(135deg, var(--sakura), var(--sunset));
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 16px;
+      cursor: pointer;
+      font-family: 'Noto Sans SC', sans-serif;
+      font-weight: 500;
+      font-size: 0.9em;
+      transition: all 0.2s;
+      width: 100%;
+    }
+
+    .mood-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 15px rgba(255, 183, 197, 0.4);
+    }
+
+    .mood-btn:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+
+    .stats-section {
+      margin-top: 16px;
+      padding: 14px;
+      background: var(--sakura-light);
+      border-radius: 12px;
+    }
+
+    .stats-section h3 {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 0.9em;
+      margin-bottom: 8px;
+      color: var(--night);
+    }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .stat-item { text-align: center; }
+
+    .stat-number { font-size: 1.3em; font-weight: 700; color: var(--sakura-dark); }
+    .stat-label { font-size: 0.7em; color: var(--text-light); }
+
+    .main-content { padding: 10px 0; }
+    .view { display: none; }
+    .view.active { display: block; }
+
+    .welcome-card { text-align: center; padding: 50px 20px; }
+
+    .welcome-card .big-mascot {
+      font-size: 4em;
+      margin-bottom: 16px;
+    }
+
+    .welcome-card h2 {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.6em;
+      color: var(--sakura-dark);
+      margin-bottom: 8px;
+    }
+
+    .welcome-card p {
+      color: var(--text-light);
+      font-size: 0.92em;
+      max-width: 420px;
+      margin: 0 auto;
+      line-height: 1.8;
+    }
+
+    .welcome-quote {
+      margin-top: 20px;
+      padding: 16px;
+      background: var(--sakura-light);
+      border-radius: 12px;
+      font-family: 'Noto Serif SC', serif;
+      font-size: 0.9em;
+      color: var(--sakura-dark);
+      font-style: italic;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .generate-today-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--sakura), var(--sunset));
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 28px;
+      cursor: pointer;
+      font-family: 'Noto Sans SC', sans-serif;
+      font-weight: 500;
+      font-size: 1em;
+      transition: all 0.3s;
+      margin-top: 20px;
+    }
+
+    .generate-today-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(255, 183, 197, 0.4);
+    }
+
+    .diary-list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+
+    .diary-list-header h2 {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.3em;
+      color: var(--night);
+    }
+
+    .diary-list { display: flex; flex-direction: column; gap: 14px; }
+
+    .diary-card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px 24px;
+      box-shadow: 0 2px 15px var(--shadow);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .diary-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 25px rgba(255, 183, 197, 0.2);
+      border-color: var(--sakura);
+    }
+
+    .diary-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .diary-card-date {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.05em;
+      color: var(--night);
+    }
+
+    .diary-card-meta { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+
+    .badge { padding: 2px 8px; border-radius: 20px; font-size: 0.75em; }
+    .user-badge { background: rgba(255, 154, 118, 0.15); color: var(--sunset); }
+
+    .diary-card-preview {
+      color: var(--text-light);
+      font-size: 0.88em;
+      line-height: 1.6;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .diary-card-footer {
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .reply-count { font-size: 0.78em; color: var(--sakura-dark); }
+    .read-more { font-size: 0.78em; color: var(--sakura); font-weight: 500; }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-light);
+      font-size: 0.9em;
+      cursor: pointer;
+      margin-bottom: 20px;
+      transition: color 0.2s;
+      background: none;
+      border: none;
+      font-family: 'Noto Sans SC', sans-serif;
+    }
+
+    .back-btn:hover { color: var(--sakura-dark); }
+
+    .diary-detail-card {
+      background: white;
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: 0 2px 20px var(--shadow);
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+
+    .diary-detail-header {
+      text-align: center;
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .diary-detail-date {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.3em;
+      color: var(--night);
+      margin-bottom: 6px;
+    }
+
+    .diary-detail-meta {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .diary-detail-content {
+      font-size: 0.98em;
+      line-height: 2.1;
+      color: var(--text);
+      white-space: pre-wrap;
+      font-family: 'Noto Serif SC', serif;
+    }
+
+    .diary-detail-created {
+      text-align: right;
+      font-size: 0.78em;
+      color: var(--text-light);
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px dashed var(--border);
+    }
+
+    .reply-section {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 2px 15px var(--shadow);
+      border: 1px solid var(--border);
+    }
+
+    .reply-section h3 {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.05em;
+      color: var(--night);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .existing-replies { margin-bottom: 16px; }
+
+    .reply-item {
+      background: var(--sakura-light);
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+      border-left: 3px solid var(--sakura);
+    }
+
+    .reply-item-content { font-size: 0.88em; line-height: 1.6; }
+    .reply-item-time { font-size: 0.72em; color: var(--text-light); margin-top: 4px; }
+
+    .reply-form { display: flex; gap: 10px; align-items: flex-end; }
+
+    .reply-textarea {
+      flex: 1;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 0.88em;
+      resize: vertical;
+      min-height: 56px;
+      transition: border-color 0.3s;
+      outline: none;
+    }
+
+    .reply-textarea:focus { border-color: var(--sakura); }
+
+    .reply-submit-btn {
+      background: var(--sakura);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 20px;
+      cursor: pointer;
+      font-family: 'Noto Sans SC', sans-serif;
+      font-weight: 500;
+      font-size: 0.88em;
+      transition: all 0.2s;
+      white-space: nowrap;
+      height: fit-content;
+    }
+
+    .reply-submit-btn:hover { background: var(--sakura-dark); transform: translateY(-1px); }
+
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255, 248, 240, 0.92);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    .loading-overlay.active { display: flex; }
+
+    .loading-spinner {
+      font-size: 3em;
+      animation: bounce 1s infinite;
+    }
+
+    .loading-text {
+      margin-top: 16px;
+      font-family: 'Noto Serif SC', serif;
+      color: var(--sakura-dark);
+      font-size: 1.05em;
+    }
+
+    .loading-hint {
+      margin-top: 8px;
+      font-size: 0.8em;
+      color: var(--text-light);
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--night);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 0.88em;
+      transition: transform 0.3s ease;
+      z-index: 2000;
+      max-width: 90vw;
+      text-align: center;
+    }
+
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    .empty-state {
+      text-align: center;
+      padding: 50px 20px;
+      color: var(--text-light);
+    }
+
+    .empty-state .empty-icon { font-size: 3em; margin-bottom: 14px; }
+    .empty-state p { font-size: 0.92em; }
+
+    .tts-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 16px;
+      padding: 12px 16px;
+      background: linear-gradient(135deg, rgba(255,183,197,0.1), rgba(255,154,118,0.1));
+      border-radius: 12px;
+      border: 1px dashed var(--sakura);
+    }
+
+    .tts-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--sakura);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 0.85em;
+      font-weight: 500;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .tts-btn:hover { background: var(--sakura-dark); transform: translateY(-1px); }
+    .tts-btn:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+    .tts-btn.playing { background: var(--sunset); animation: pulse 1.5s infinite; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .tts-lang-toggle {
+      display: flex;
+      gap: 4px;
+      background: white;
+      border-radius: 8px;
+      padding: 2px;
+      border: 1px solid var(--border);
+    }
+
+    .tts-lang-btn {
+      padding: 4px 10px;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.75em;
+      cursor: pointer;
+      background: transparent;
+      color: var(--text-light);
+      font-family: 'Noto Sans SC', sans-serif;
+      transition: all 0.2s;
+    }
+
+    .tts-lang-btn.active { background: var(--sakura); color: white; }
+
+    .tts-status {
+      font-size: 0.78em;
+      color: var(--text-light);
+      flex: 1;
+      text-align: right;
+    }
+
+    .tts-player {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .tts-player.show { display: flex; flex: 1; }
+
+    .tts-player audio {
+      height: 32px;
+      flex: 1;
+      border-radius: 8px;
+    }
+
+    .tts-transcript {
+      margin-top: 8px;
+      padding: 8px 12px;
+      background: rgba(255,183,197,0.08);
+      border-radius: 8px;
+      font-size: 0.75em;
+      color: var(--text-light);
+      font-style: italic;
+      max-height: 60px;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .tts-transcript.show { display: block; }
+
+    .settings-btn {
+      width: 100%;
+      margin-top: 12px;
+      background: rgba(127, 140, 141, 0.08);
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      padding: 10px 16px;
+      cursor: pointer;
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 0.82em;
+      color: var(--text-light);
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .settings-btn:hover {
+      background: rgba(255, 183, 197, 0.1);
+      border-color: var(--sakura);
+      color: var(--sakura-dark);
+    }
+
+    .config-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(44, 62, 80, 0.4);
+      z-index: 1500;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(4px);
+    }
+
+    .config-overlay.active { display: flex; }
+
+    .config-panel {
+      background: white;
+      border-radius: 20px;
+      padding: 32px;
+      width: 90%;
+      max-width: 520px;
+      box-shadow: 0 10px 40px rgba(44, 62, 80, 0.2);
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+
+    .config-panel h2 {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.2em;
+      color: var(--night);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .config-group {
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px dashed var(--border);
+    }
+
+    .config-group:last-of-type {
+      border-bottom: none;
+    }
+
+    .config-group h3 {
+      font-size: 0.88em;
+      color: var(--sakura-dark);
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+
+    .config-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 10px;
+    }
+
+    .config-field label {
+      font-size: 0.8em;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    .config-field input {
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 0.88em;
+      transition: border-color 0.3s;
+      outline: none;
+      width: 100%;
+    }
+
+    .config-field input:focus { border-color: var(--sakura); }
+
+    .config-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+
+    .config-cancel-btn {
+      background: transparent;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 0.88em;
+      color: var(--text-light);
+      transition: all 0.2s;
+    }
+
+    .config-cancel-btn:hover { border-color: var(--text-light); color: var(--text); }
+
+    .config-save-btn {
+      background: linear-gradient(135deg, var(--sakura), var(--sunset));
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 24px;
+      cursor: pointer;
+      font-family: 'Noto Sans SC', sans-serif;
+      font-weight: 500;
+      font-size: 0.88em;
+      transition: all 0.2s;
+    }
+
+    .config-save-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 15px rgba(255, 183, 197, 0.4);
+    }
+
+    .config-save-btn:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+
+    .search-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .search-bar input {
+      flex: 1;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 0.88em;
+      transition: border-color 0.3s;
+      outline: none;
+    }
+
+    .search-bar input:focus { border-color: var(--sakura); }
+
+    .search-bar button {
+      background: var(--sakura);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 16px;
+      cursor: pointer;
+      font-size: 0.88em;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+
+    .search-bar button:hover { background: var(--sakura-dark); }
+
+    .search-info {
+      font-size: 0.82em;
+      color: var(--text-light);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .detail-actions {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .detail-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 10px;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 0.82em;
+      color: var(--text-light);
+      transition: all 0.2s;
+    }
+
+    .detail-btn:hover { border-color: var(--sakura); color: var(--sakura-dark); }
+    .detail-btn.danger:hover { border-color: #E74C3C; color: #E74C3C; }
+
+    .random-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, var(--sky), #B388FF);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 18px;
+      cursor: pointer;
+      font-family: 'Noto Sans SC', sans-serif;
+      font-weight: 500;
+      font-size: 0.88em;
+      transition: all 0.2s;
+    }
+
+    .random-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 15px rgba(135, 206, 235, 0.4);
+    }
+
+    .stats-grid-extended {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .scroll-top-btn {
+      display: none;
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--sakura);
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 1.2em;
+      box-shadow: 0 4px 15px rgba(255, 183, 197, 0.4);
+      transition: all 0.3s;
+      z-index: 500;
+    }
+
+    .scroll-top-btn.show { display: flex; align-items: center; justify-content: center; }
+    .scroll-top-btn:hover { background: var(--sakura-dark); transform: translateY(-2px); }
+
+    .confirm-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(44, 62, 80, 0.4);
+      z-index: 1500;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(4px);
+    }
+
+    .confirm-overlay.active { display: flex; }
+
+    .confirm-box {
+      background: white;
+      border-radius: 16px;
+      padding: 28px;
+      width: 90%;
+      max-width: 380px;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(44, 62, 80, 0.2);
+    }
+
+    .confirm-box p {
+      margin-bottom: 20px;
+      font-size: 0.95em;
+      color: var(--text);
+    }
+
+    .confirm-actions { display: flex; gap: 10px; justify-content: center; }
+
+    .confirm-no {
+      background: transparent;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 24px;
+      cursor: pointer;
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 0.88em;
+      color: var(--text-light);
+      transition: all 0.2s;
+    }
+
+    .confirm-no:hover { border-color: var(--text-light); color: var(--text); }
+
+    .confirm-yes {
+      background: #E74C3C;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 24px;
+      cursor: pointer;
+      font-family: 'Noto Sans SC', sans-serif;
+      font-weight: 500;
+      font-size: 0.88em;
+      transition: all 0.2s;
+    }
+
+    .confirm-yes:hover { background: #C0392B; }
+
+    .view-list-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-light);
+      font-size: 0.85em;
+      cursor: pointer;
+      margin-bottom: 16px;
+      transition: color 0.2s;
+      background: none;
+      border: none;
+      font-family: 'Noto Sans SC', sans-serif;
+    }
+
+    .view-list-btn:hover { color: var(--sakura-dark); }
+  </style>
+</head>
+<body>
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner">🎸</div>
+    <div class="loading-text">虹夏正在写日记...</div>
+    <div class="loading-hint">AI 生成中，请稍候</div>
+  </div>
+  <div class="toast" id="toast"></div>
+  <button class="scroll-top-btn" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-box">
+      <p id="confirmText">确定要执行此操作吗？</p>
+      <div class="confirm-actions">
+        <button class="confirm-no" onclick="closeConfirm()">取消</button>
+        <button class="confirm-yes" id="confirmYesBtn">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="card">
+        <div class="logo-section">
+          <div class="mascot">🎸</div>
+          <h1>虹夏日记</h1>
+          <div class="subtitle">你的音乐伙伴的私密日志</div>
+        </div>
+
+        <div class="character-card">
+          <h3>🎤 虹夏的个人资料</h3>
+          <div class="character-info">
+            <span class="label">乐队</span><span class="value">结束乐队</span>
+            <span class="label">担当</span><span class="value">鼓手 · 队长</span>
+            <span class="label">年级</span><span class="value">高中二年级</span>
+            <span class="label">生日</span><span class="value">5月29日</span>
+            <span class="label">身高</span><span class="value">156cm</span>
+          </div>
+          <div class="character-tags">
+            <span class="char-tag">坚韧不拔</span>
+            <span class="char-tag">天然呆</span>
+            <span class="char-tag">怀旧</span>
+            <span class="char-tag">队长</span>
+            <span class="char-tag">冰淇淋控</span>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 16px;">
+          <div class="calendar-header">
+            <h3 id="calendarMonth"></h3>
+            <div class="calendar-nav">
+              <button onclick="changeMonth(-1)">‹</button>
+              <button onclick="changeMonth(0)">●</button>
+              <button onclick="changeMonth(1)">›</button>
+            </div>
+          </div>
+          <div class="calendar-grid" id="calendarGrid"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="mood-section">
+          <h3>✍️ 告诉虹夏今天的心情</h3>
+          <div class="mood-fields">
+            <div class="field-group">
+              <label>💭 今天的心情</label>
+              <input type="text" id="moodInput" placeholder="例：今天有点累...">
+            </div>
+            <div class="field-group">
+              <label>📖 今天发生了什么</label>
+              <textarea id="eventInput" placeholder="例：和朋友一起去看了演出"></textarea>
+            </div>
+            <div class="field-group">
+              <label>🍽️ 今天吃了什么</label>
+              <input type="text" id="foodInput" placeholder="例：吃了冰淇淋">
+            </div>
+            <button class="mood-btn" id="moodBtn" onclick="submitMood()">📝 让虹夏写日记</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-section">
+        <h3>📊 日记统计</h3>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-number" id="statDiaries">0</div>
+            <div class="stat-label">日记数</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number" id="statReplies">0</div>
+            <div class="stat-label">回复数</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number" id="statUser">0</div>
+            <div class="stat-label">互动日记</div>
+          </div>
+        </div>
+        <div class="stats-grid-extended" style="margin-top: 8px;">
+          <div class="stat-item">
+            <div class="stat-number" id="statStreak">0</div>
+            <div class="stat-label">连续天数</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number" id="statChars">0</div>
+            <div class="stat-label">总字数</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number" id="statFirst">-</div>
+            <div class="stat-label">首篇日记</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="settings-btn" onclick="openConfig()">⚙️ API 配置设置</button>
+    </aside>
+
+    <div class="config-overlay" id="configOverlay">
+      <div class="config-panel">
+        <h2>⚙️ API 配置设置</h2>
+        <div class="config-group">
+          <h3>🧠 MiMo 模型配置</h3>
+          <div class="config-field">
+            <label>API 密钥</label>
+            <input type="text" id="configApiKey" placeholder="输入 MiMo API Key">
+          </div>
+          <div class="config-field">
+            <label>API 地址</label>
+            <input type="text" id="configBaseUrl" placeholder="https://token-plan-cn.xiaomimimo.com/v1">
+          </div>
+          <div class="config-field">
+            <label>模型名称</label>
+            <input type="text" id="configModel" placeholder="mimo-v2.5-pro">
+          </div>
+        </div>
+        <div class="config-group">
+          <h3>🔊 TTS 语音配置</h3>
+          <div class="config-field">
+            <label>TTS 服务端口</label>
+            <input type="number" id="configTtsPort" placeholder="5000">
+          </div>
+        </div>
+        <div class="config-actions">
+          <button class="config-cancel-btn" onclick="closeConfig()">取消</button>
+          <button class="config-save-btn" id="configSaveBtn" onclick="saveConfig()">保存</button>
+        </div>
+      </div>
+    </div>
+
+    <main class="main-content">
+      <div class="view active" id="welcomeView">
+        <div class="card welcome-card">
+          <div class="big-mascot">🥁</div>
+          <h2>欢迎来到虹夏的日记</h2>
+          <p>这是虹夏每天记录练习、遇见的人、对生活的感悟的私密日志。点击日历上的日期翻阅她的日记，也可以写下你的心情，虹夏会在下一篇日记中回应你。</p>
+          <div class="welcome-quote">
+            「结束乐队，重新开始活动了！」
+          </div>
+          <button class="generate-today-btn" onclick="generateToday()">
+            📝 让虹夏写下今天
+          </button>
+        </div>
+      </div>
+
+      <div class="view" id="diaryListView">
+        <div class="diary-list-header">
+          <h2>📖 日记列表</h2>
+          <button class="random-btn" onclick="openRandomDiary()">🎲 随机阅读</button>
+        </div>
+        <div class="search-bar">
+          <input type="text" id="searchInput" placeholder="搜索日记内容..." onkeydown="if(event.key==='Enter')searchDiaries()">
+          <button onclick="searchDiaries()">🔍 搜索</button>
+        </div>
+        <div class="search-info" id="searchInfo" style="display:none;"></div>
+        <div class="diary-list" id="diaryList"></div>
+      </div>
+
+      <div class="view" id="diaryDetailView">
+        <button class="back-btn" onclick="showList()">← 返回日记列表</button>
+        <div class="diary-detail-card" id="diaryDetailCard"></div>
+        <div class="reply-section" id="replySection">
+          <h3>💌 给虹夏写回复</h3>
+          <div class="existing-replies" id="existingReplies"></div>
+          <div class="reply-form">
+            <textarea class="reply-textarea" id="replyInput" placeholder="给虹夏写一条消息吧..."></textarea>
+            <button class="reply-submit-btn" id="replyBtn" onclick="submitReply()">发送</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    let currentYear, currentMonth;
+    let diaryDates = [];
+    let currentDiaryDate = null;
+
+    const now = new Date();
+    currentYear = now.getFullYear();
+    currentMonth = now.getMonth();
+
+    async function init() {
+      await loadDiaryDates();
+      await loadStats();
+      renderCalendar();
+      showView('welcome');
+    }
+
+    async function openConfig() {
+      try {
+        const res = await fetch('/api/config');
+        const cfg = await res.json();
+        document.getElementById('configApiKey').value = cfg.mimo.apiKey || '';
+        document.getElementById('configBaseUrl').value = cfg.mimo.baseUrl || '';
+        document.getElementById('configModel').value = cfg.mimo.model || '';
+        document.getElementById('configTtsPort').value = cfg.tts.port || 5000;
+      } catch (e) {
+        showToast('加载配置失败');
+      }
+      document.getElementById('configOverlay').classList.add('active');
+    }
+
+    function closeConfig() {
+      document.getElementById('configOverlay').classList.remove('active');
+    }
+
+    async function saveConfig() {
+      const btn = document.getElementById('configSaveBtn');
+      btn.disabled = true;
+      try {
+        const payload = {
+          mimo: {
+            apiKey: document.getElementById('configApiKey').value.trim(),
+            baseUrl: document.getElementById('configBaseUrl').value.trim(),
+            model: document.getElementById('configModel').value.trim()
+          },
+          tts: {
+            port: parseInt(document.getElementById('configTtsPort').value, 10) || 5000
+          }
+        };
+        const res = await fetch('/api/config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error('保存失败');
+        showToast('配置已保存，新配置将在下次请求时生效');
+        closeConfig();
+      } catch (e) {
+        showToast('保存配置失败: ' + e.message);
+      }
+      btn.disabled = false;
+    }
+
+    document.getElementById('configOverlay').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('configOverlay')) closeConfig();
+    });
+
+    async function loadDiaryDates() {
+      try {
+        const res = await fetch('/api/dates-with-diaries');
+        diaryDates = await res.json();
+      } catch (e) { console.error(e); }
+    }
+
+    async function loadStats() {
+      try {
+        const res = await fetch('/api/stats');
+        const data = await res.json();
+        document.getElementById('statDiaries').textContent = data.totalDiaries;
+        document.getElementById('statReplies').textContent = data.totalReplies;
+        document.getElementById('statUser').textContent = data.userTriggeredCount || 0;
+        document.getElementById('statStreak').textContent = data.streak || 0;
+        document.getElementById('statChars').textContent = data.totalChars > 9999 ? Math.round(data.totalChars / 1000) + 'k' : data.totalChars;
+        document.getElementById('statFirst').textContent = data.firstDiary ? data.firstDiary.substring(5) : '-';
+      } catch (e) { console.error(e); }
+    }
+
+    function renderCalendar() {
+      const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+      document.getElementById('calendarMonth').textContent = `${currentYear}年 ${monthNames[currentMonth]}`;
+
+      const grid = document.getElementById('calendarGrid');
+      grid.innerHTML = '';
+
+      ['日', '一', '二', '三', '四', '五', '六'].forEach(label => {
+        const el = document.createElement('div');
+        el.className = 'calendar-day-label';
+        el.textContent = label;
+        grid.appendChild(el);
+      });
+
+      const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+      for (let i = 0; i < firstDay; i++) {
+        const el = document.createElement('div');
+        el.className = 'calendar-day empty';
+        grid.appendChild(el);
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const el = document.createElement('div');
+        el.className = 'calendar-day';
+        el.textContent = day;
+
+        const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+        if (dateStr === now.toISOString().split('T')[0]) el.classList.add('today');
+        if (diaryDates.includes(dateStr)) el.classList.add('has-diary');
+        if (dateStr === currentDiaryDate) el.classList.add('selected');
+
+        el.onclick = () => selectDate(dateStr);
+        grid.appendChild(el);
+      }
+    }
+
+    function changeMonth(delta) {
+      if (delta === 0) {
+        currentYear = now.getFullYear();
+        currentMonth = now.getMonth();
+      } else {
+        currentMonth += delta;
+        if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+        else if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+      }
+      renderCalendar();
+    }
+
+    async function selectDate(dateStr) {
+      currentDiaryDate = dateStr;
+      renderCalendar();
+      showLoading();
+      try {
+        let res = await fetch(`/api/diaries/${dateStr}`);
+        if (res.status === 404) {
+          res = await fetch('/api/diaries/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ date: dateStr })
+          });
+        }
+        const diary = await res.json();
+        if (diary.error) {
+          showToast(diary.error);
+          hideLoading();
+          return;
+        }
+        showDiaryDetail(diary);
+      } catch (e) {
+        showToast('出错了，请稍后再试');
+      }
+      hideLoading();
+    }
+
+    async function generateToday() {
+      showLoading();
+      try {
+        const res = await fetch('/api/diaries/auto-generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await res.json();
+        if (data.error) {
+          showToast(data.error);
+          hideLoading();
+          return;
+        }
+        if (data.diary) {
+          await loadDiaryDates();
+          currentDiaryDate = data.diary.date;
+          renderCalendar();
+          showDiaryDetail(data.diary);
+          showToast('虹夏写好了今天的日记！');
+        }
+      } catch (e) {
+        showToast('出错了，请稍后再试');
+      }
+      hideLoading();
+    }
+
+    async function submitMood() {
+      const mood = document.getElementById('moodInput').value.trim();
+      const event = document.getElementById('eventInput').value.trim();
+      const food = document.getElementById('foodInput').value.trim();
+
+      if (!mood && !event && !food) {
+        showToast('至少填写一项内容');
+        return;
+      }
+
+      const today = now.toISOString().split('T')[0];
+      showLoading();
+      try {
+        const res = await fetch('/api/diaries/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ date: today, mood, event, food })
+        });
+        const diary = await res.json();
+        if (diary.error) {
+          showToast(diary.error);
+          hideLoading();
+          return;
+        }
+        document.getElementById('moodInput').value = '';
+        document.getElementById('eventInput').value = '';
+        document.getElementById('foodInput').value = '';
+        await loadDiaryDates();
+        await loadStats();
+        currentDiaryDate = today;
+        renderCalendar();
+        showDiaryDetail(diary);
+        showToast('虹夏回应了你的心情！');
+      } catch (e) {
+        showToast('出错了，请稍后再试');
+      }
+      hideLoading();
+    }
+
+    async function submitReply() {
+      const input = document.getElementById('replyInput');
+      const content = input.value.trim();
+      if (!content || !currentDiaryDate) {
+        showToast('请输入回复内容');
+        return;
+      }
+
+      document.getElementById('replyBtn').disabled = true;
+      try {
+        const res = await fetch(`/api/diaries/${currentDiaryDate}/reply`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content })
+        });
+        const diary = await res.json();
+        input.value = '';
+        renderReplies(diary.replies);
+        await loadStats();
+        showToast('回复已发送！虹夏会在下次日记中回应你');
+      } catch (e) {
+        showToast('出错了，请稍后再试');
+      }
+      document.getElementById('replyBtn').disabled = false;
+    }
+
+    function showView(view) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      const map = { welcome: 'welcomeView', list: 'diaryListView', detail: 'diaryDetailView' };
+      document.getElementById(map[view]).classList.add('active');
+    }
+
+    let currentTTSContent = '';
+
+    async function speakDiary(dateStr) {
+      const btn = document.getElementById('ttsBtn');
+      const status = document.getElementById('ttsStatus');
+      const player = document.getElementById('ttsPlayer');
+      const audio = document.getElementById('ttsAudio');
+
+      if (audio && !audio.paused) {
+        audio.pause();
+        audio.currentTime = 0;
+        btn.classList.remove('playing');
+        btn.textContent = '🔊 虹夏朗读';
+        status.textContent = '已暂停';
+        return;
+      }
+
+      if (btn.dataset.cached === 'true' && audio.src) {
+        audio.play();
+        btn.classList.add('playing');
+        btn.textContent = '⏸ 暂停朗读';
+        status.textContent = '朗读中...';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = '⏳ 翻译并生成中...';
+      status.textContent = 'MiMo 翻译中 → 虹夏语音合成中...';
+
+      try {
+        const res = await fetch('/api/tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: currentTTSContent })
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || '语音生成失败');
+        }
+
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        audio.src = url;
+        btn.dataset.cached = 'true';
+
+        audio.onended = () => {
+          btn.classList.remove('playing');
+          btn.textContent = '🔊 再听一次';
+          status.textContent = '朗读完毕';
+        };
+
+        audio.play();
+        btn.classList.add('playing');
+        btn.textContent = '⏸ 暂停朗读';
+        status.textContent = '朗读中...';
+      } catch (e) {
+        status.textContent = '❌ ' + e.message;
+        btn.textContent = '🔊 虹夏朗读';
+      }
+      btn.disabled = false;
+    }
+
+    function showDiaryDetail(diary) {
+      currentTTSContent = diary.content;
+      const card = document.getElementById('diaryDetailCard');
+      const dateObj = new Date(diary.date + 'T00:00:00');
+      const dayOfWeek = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'][dateObj.getDay()];
+      const formattedDate = `${dateObj.getFullYear()}年${dateObj.getMonth() + 1}月${dateObj.getDate()}日 ${dayOfWeek}`;
+
+      card.innerHTML = `
+        <div class="diary-detail-header">
+          <div class="diary-detail-date">${formattedDate}</div>
+          <div class="diary-detail-meta">
+            ${diary.isUserTriggered ? '<span class="badge user-badge">💬 互动日记</span>' : ''}
+          </div>
+        </div>
+        <div class="detail-actions">
+          <button class="detail-btn" onclick="exportDiary()">📄 导出文本</button>
+          <button class="detail-btn danger" onclick="deleteDiary('${diary.date}')">🗑️ 删除日记</button>
+        </div>
+        <div class="diary-detail-content">${escapeHtml(diary.content)}</div>
+        <div class="diary-detail-created">记录于: ${new Date(diary.createdAt).toLocaleString('zh-CN')}</div>
+        <div class="tts-bar" id="ttsBar">
+          <button class="tts-btn" id="ttsBtn" onclick="speakDiary('${diary.date}')">🔊 虹夏朗读</button>
+          <div class="tts-status" id="ttsStatus">中文日记→翻译成日语→虹夏的声音朗读</div>
+          <div class="tts-player" id="ttsPlayer">
+            <audio id="ttsAudio" controls></audio>
+          </div>
+        </div>
+      `;
+
+      renderReplies(diary.replies || []);
+      showView('detail');
+
+      const btn = document.getElementById('ttsBtn');
+      if (btn) {
+        btn.dataset.cached = 'false';
+        btn.textContent = '🔊 虹夏朗读';
+        btn.classList.remove('playing');
+        btn.disabled = false;
+      }
+      const status = document.getElementById('ttsStatus');
+      if (status) status.textContent = '中文日记→翻译成日语→虹夏的声音朗读';
+      const player = document.getElementById('ttsPlayer');
+      if (player) player.classList.remove('show');
+    }
+
+    function renderReplies(replies) {
+      const container = document.getElementById('existingReplies');
+      if (replies.length === 0) {
+        container.innerHTML = '<p style="color: var(--text-light); font-size: 0.82em; margin-bottom: 14px;">还没有回复，给虹夏写一条消息吧。</p>';
+        return;
+      }
+      container.innerHTML = replies.map(r => `
+        <div class="reply-item">
+          <div class="reply-item-content">${escapeHtml(r.content)}</div>
+          <div class="reply-item-time">${new Date(r.createdAt).toLocaleString('zh-CN')}</div>
+        </div>
+      `).join('');
+    }
+
+    function showList() {
+      loadDiaryList();
+      showView('list');
+    }
+
+    async function loadDiaryList() {
+      try {
+        const res = await fetch('/api/diaries');
+        const data = await res.json();
+        const list = document.getElementById('diaryList');
+
+        if (data.diaries.length === 0) {
+          list.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">📝</div>
+              <p>还没有日记</p>
+              <button class="generate-today-btn" onclick="generateToday()">📝 让虹夏写日记</button>
+            </div>
+          `;
+          return;
+        }
+
+        list.innerHTML = data.diaries.reverse().map(d => {
+          const dateObj = new Date(d.date + 'T00:00:00');
+          const dayOfWeek = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'][dateObj.getDay()];
+          const formattedDate = `${dateObj.getMonth() + 1}月${dateObj.getDate()}日 ${dayOfWeek}`;
+
+          return `
+            <div class="diary-card" onclick="selectDate('${d.date}')">
+              <div class="diary-card-header">
+                <div class="diary-card-date">${formattedDate}</div>
+                <div class="diary-card-meta">
+                  ${d.isUserTriggered ? '<span class="badge user-badge">💬</span>' : ''}
+                </div>
+              </div>
+              <div class="diary-card-preview">${escapeHtml(d.preview)}</div>
+              <div class="diary-card-footer">
+                <span class="reply-count">${d.replyCount > 0 ? '💌 ' + d.replyCount : ''}</span>
+                <span class="read-more">阅读全文 →</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (e) { console.error(e); }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function showLoading() {
+      document.getElementById('loadingOverlay').classList.add('active');
+    }
+
+    function hideLoading() {
+      document.getElementById('loadingOverlay').classList.remove('active');
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3500);
+    }
+
+    function showConfirm(text, onConfirm) {
+      document.getElementById('confirmText').textContent = text;
+      const btn = document.getElementById('confirmYesBtn');
+      btn.onclick = () => { closeConfirm(); onConfirm(); };
+      document.getElementById('confirmOverlay').classList.add('active');
+    }
+
+    function closeConfirm() {
+      document.getElementById('confirmOverlay').classList.remove('active');
+    }
+
+    document.getElementById('confirmOverlay').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('confirmOverlay')) closeConfirm();
+    });
+
+    async function searchDiaries() {
+      const query = document.getElementById('searchInput').value.trim();
+      const info = document.getElementById('searchInfo');
+      if (!query) {
+        info.style.display = 'none';
+        loadDiaryList();
+        return;
+      }
+      try {
+        const res = await fetch(`/api/diaries/search?q=${encodeURIComponent(query)}`);
+        const data = await res.json();
+        const list = document.getElementById('diaryList');
+        info.style.display = 'flex';
+        if (data.total === 0) {
+          info.innerHTML = `🔍 没有找到与「${escapeHtml(query)}」相关的日记`;
+          list.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><p>没有搜索结果</p></div>`;
+          return;
+        }
+        info.innerHTML = `🔍 找到 ${data.total} 条与「${escapeHtml(query)}」相关的日记 · <a href="#" onclick="event.preventDefault();document.getElementById('searchInput').value='';searchDiaries();" style="color:var(--sakura)">清除搜索</a>`;
+        list.innerHTML = data.results.map(d => {
+          const dateObj = new Date(d.date + 'T00:00:00');
+          const dayOfWeek = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'][dateObj.getDay()];
+          const formattedDate = `${dateObj.getMonth() + 1}月${dateObj.getDate()}日 ${dayOfWeek}`;
+          return `
+            <div class="diary-card" onclick="selectDate('${d.date}')">
+              <div class="diary-card-header">
+                <div class="diary-card-date">${formattedDate}</div>
+                <div class="diary-card-meta">
+                  ${d.isUserTriggered ? '<span class="badge user-badge">💬</span>' : ''}
+                </div>
+              </div>
+              <div class="diary-card-preview">${escapeHtml(d.preview)}</div>
+              <div class="diary-card-footer">
+                <span class="reply-count">${d.replyCount > 0 ? '💌 ' + d.replyCount : ''}</span>
+                <span class="read-more">阅读全文 →</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (e) {
+        showToast('搜索出错');
+      }
+    }
+
+    async function openRandomDiary() {
+      showLoading();
+      try {
+        const res = await fetch('/api/diaries/random');
+        if (!res.ok) {
+          const err = await res.json();
+          showToast(err.error || '没有日记');
+          hideLoading();
+          return;
+        }
+        const diary = await res.json();
+        showDiaryDetail(diary);
+      } catch (e) {
+        showToast('出错了，请稍后再试');
+      }
+      hideLoading();
+    }
+
+    async function deleteDiary(dateStr) {
+      showConfirm('确定要删除这篇日记吗？此操作无法撤销。', async () => {
+        try {
+          const res = await fetch(`/api/diaries/${dateStr}`, { method: 'DELETE' });
+          if (!res.ok) throw new Error('删除失败');
+          showToast('日记已删除');
+          await loadDiaryDates();
+          await loadStats();
+          renderCalendar();
+          showList();
+        } catch (e) {
+          showToast('删除失败: ' + e.message);
+        }
+      });
+    }
+
+    function exportDiary() {
+      if (!currentDiaryDate) return;
+      fetch(`/api/diaries/${currentDiaryDate}`)
+        .then(res => res.json())
+        .then(diary => {
+          const lines = [];
+          lines.push(diary.title || diary.date);
+          lines.push('─'.repeat(30));
+          lines.push(diary.content);
+          if (diary.replies && diary.replies.length > 0) {
+            lines.push('');
+            lines.push('─'.repeat(30));
+            lines.push('回复：');
+            diary.replies.forEach((r, i) => {
+              lines.push(`  ${i + 1}. ${r.content}  (${new Date(r.createdAt).toLocaleString('zh-CN')})`);
+            });
+          }
+          const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `虹夏日记_${diary.date}.txt`;
+          a.click();
+          URL.revokeObjectURL(url);
+          showToast('日记已导出');
+        })
+        .catch(() => showToast('导出失败'));
+    }
+
+    window.addEventListener('scroll', () => {
+      const btn = document.getElementById('scrollTopBtn');
+      if (window.scrollY > 300) btn.classList.add('show');
+      else btn.classList.remove('show');
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const configEl = document.getElementById('configOverlay');
+        const confirmEl = document.getElementById('confirmOverlay');
+        if (configEl.classList.contains('active')) { closeConfig(); return; }
+        if (confirmEl.classList.contains('active')) { closeConfirm(); return; }
+        const detailView = document.getElementById('diaryDetailView');
+        if (detailView.classList.contains('active')) { showList(); return; }
+      }
+    });
+
+    document.getElementById('moodInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') submitMood();
+    });
+
+    document.getElementById('replyInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        submitReply();
+      }
+    });
+
+    init();
+  </script>
+</body>
+</html>
