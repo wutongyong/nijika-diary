@@ -47,8 +47,13 @@ if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
+const PICTURE_DIR = path.join(__dirname, 'picture');
+const PROFILE_DIR = path.join(__dirname, 'profile picture');
+
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/picture', express.static(PICTURE_DIR));
+app.use('/profile', express.static(PROFILE_DIR));
 
 function getMimoApiKey() { return config.mimo.apiKey; }
 function getMimoBaseUrl() { return config.mimo.baseUrl; }
@@ -271,12 +276,27 @@ app.get('/api/diaries', (req, res) => {
       title: diary.title,
       weather: diary.weather || '',
       preview: diary.content.substring(0, 80) + '...',
+      picture: diary.picture || null,
       hasReplies: diary.replies && diary.replies.length > 0,
       replyCount: diary.replies ? diary.replies.length : 0,
       isUserTriggered: diary.isUserTriggered || false
     };
   });
   res.json({ diaries, total: diaries.length });
+});
+
+function getRandomPicture() {
+  if (!fs.existsSync(PICTURE_DIR)) return null;
+  const files = fs.readdirSync(PICTURE_DIR).filter(f => /\.(jpg|jpeg|png|gif|webp)$/i.test(f));
+  if (files.length === 0) return null;
+  const file = files[Math.floor(Math.random() * files.length)];
+  return `/picture/${file}`;
+}
+
+app.get('/api/pictures/random', (req, res) => {
+  const pic = getRandomPicture();
+  if (!pic) return res.status(404).json({ error: '没有可用的图片' });
+  res.json({ picture: pic });
 });
 
 app.get('/api/diaries/search', (req, res) => {
@@ -298,6 +318,7 @@ app.get('/api/diaries/search', (req, res) => {
         date: d,
         title: diary.title,
         preview: diary.content.substring(0, 80) + '...',
+        picture: diary.picture || null,
         replyCount: diary.replies ? diary.replies.length : 0,
         isUserTriggered: diary.isUserTriggered || false
       });
@@ -338,11 +359,13 @@ app.post('/api/diaries/generate', async (req, res) => {
 
   try {
     const { title, content } = await generateDiaryWithAI(date, mood, event, food);
+    const picture = getRandomPicture();
 
     const diary = {
       date,
       title,
       content,
+      picture: picture || null,
       replies: [],
       createdAt: new Date().toISOString(),
       isUserTriggered: !!(mood || event || food),
@@ -368,11 +391,13 @@ app.post('/api/diaries/auto-generate', async (req, res) => {
 
   try {
     const { title, content } = await generateDiaryWithAI(today);
+    const picture = getRandomPicture();
 
     const diary = {
       date: today,
       title,
       content,
+      picture: picture || null,
       replies: [],
       createdAt: new Date().toISOString(),
       isUserTriggered: false,

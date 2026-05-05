@@ -1021,6 +1021,41 @@
     }
 
     .view-list-btn:hover { color: var(--sakura-dark); }
+
+    .diary-image {
+      width: 100%;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      max-height: 360px;
+      object-fit: cover;
+      border: 1px solid var(--border);
+    }
+
+    .diary-card-image {
+      width: 60px;
+      height: 60px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .diary-card-with-img {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .diary-card-with-img .diary-card-body { flex: 1; min-width: 0; }
+
+    .profile-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--sakura);
+      margin-bottom: 8px;
+    }
   </style>
 </head>
 <body>
@@ -1051,8 +1086,9 @@
           <div class="subtitle">你的音乐伙伴的私密日志</div>
         </div>
 
-        <div class="character-card">
-          <h3>🎤 虹夏的个人资料</h3>
+        <div class="character-card" style="text-align: center;">
+          <img class="profile-avatar" src="/profile/368a23e20cd72f385ff8da4fbf2e7c22.jpg" alt="虹夏头像" onerror="this.style.display='none'">
+          <h3 style="justify-content: center;">🎤 虹夏的个人资料</h3>
           <div class="character-info">
             <span class="label">乐队</span><span class="value">结束乐队</span>
             <span class="label">担当</span><span class="value">鼓手 · 队长</span>
@@ -1543,6 +1579,8 @@
       const dayOfWeek = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'][dateObj.getDay()];
       const formattedDate = `${dateObj.getFullYear()}年${dateObj.getMonth() + 1}月${dateObj.getDate()}日 ${dayOfWeek}`;
 
+      const pictureHtml = diary.picture ? `<img class="diary-image" src="${diary.picture}" alt="虹夏的图片" onerror="this.style.display='none'">` : '';
+
       card.innerHTML = `
         <div class="diary-detail-header">
           <div class="diary-detail-date">${formattedDate}</div>
@@ -1554,6 +1592,7 @@
           <button class="detail-btn" onclick="exportDiary()">📄 导出文本</button>
           <button class="detail-btn danger" onclick="deleteDiary('${diary.date}')">🗑️ 删除日记</button>
         </div>
+        ${pictureHtml}
         <div class="diary-detail-content">${escapeHtml(diary.content)}</div>
         <div class="diary-detail-created">记录于: ${new Date(diary.createdAt).toLocaleString('zh-CN')}</div>
         <div class="tts-bar" id="ttsBar">
@@ -1621,19 +1660,23 @@
           const dateObj = new Date(d.date + 'T00:00:00');
           const dayOfWeek = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'][dateObj.getDay()];
           const formattedDate = `${dateObj.getMonth() + 1}月${dateObj.getDate()}日 ${dayOfWeek}`;
+          const imgTag = d.picture ? `<img class="diary-card-image" src="${d.picture}" onerror="this.style.display='none'" alt="">` : '';
 
           return `
-            <div class="diary-card" onclick="selectDate('${d.date}')">
-              <div class="diary-card-header">
-                <div class="diary-card-date">${formattedDate}</div>
-                <div class="diary-card-meta">
-                  ${d.isUserTriggered ? '<span class="badge user-badge">💬</span>' : ''}
+            <div class="diary-card${d.picture ? ' diary-card-with-img' : ''}" onclick="selectDate('${d.date}')">
+              ${imgTag}
+              <div class="diary-card-body">
+                <div class="diary-card-header">
+                  <div class="diary-card-date">${formattedDate}</div>
+                  <div class="diary-card-meta">
+                    ${d.isUserTriggered ? '<span class="badge user-badge">💬</span>' : ''}
+                  </div>
                 </div>
-              </div>
-              <div class="diary-card-preview">${escapeHtml(d.preview)}</div>
-              <div class="diary-card-footer">
-                <span class="reply-count">${d.replyCount > 0 ? '💌 ' + d.replyCount : ''}</span>
-                <span class="read-more">阅读全文 →</span>
+                <div class="diary-card-preview">${escapeHtml(d.preview)}</div>
+                <div class="diary-card-footer">
+                  <span class="reply-count">${d.replyCount > 0 ? '💌 ' + d.replyCount : ''}</span>
+                  <span class="read-more">阅读全文 →</span>
+                </div>
               </div>
             </div>
           `;
@@ -1700,18 +1743,22 @@
           const dateObj = new Date(d.date + 'T00:00:00');
           const dayOfWeek = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'][dateObj.getDay()];
           const formattedDate = `${dateObj.getMonth() + 1}月${dateObj.getDate()}日 ${dayOfWeek}`;
+          const imgTag = d.picture ? `<img class="diary-card-image" src="${d.picture}" onerror="this.style.display='none'" alt="">` : '';
           return `
-            <div class="diary-card" onclick="selectDate('${d.date}')">
-              <div class="diary-card-header">
-                <div class="diary-card-date">${formattedDate}</div>
-                <div class="diary-card-meta">
-                  ${d.isUserTriggered ? '<span class="badge user-badge">💬</span>' : ''}
+            <div class="diary-card${d.picture ? ' diary-card-with-img' : ''}" onclick="selectDate('${d.date}')">
+              ${imgTag}
+              <div class="diary-card-body">
+                <div class="diary-card-header">
+                  <div class="diary-card-date">${formattedDate}</div>
+                  <div class="diary-card-meta">
+                    ${d.isUserTriggered ? '<span class="badge user-badge">💬</span>' : ''}
+                  </div>
                 </div>
-              </div>
-              <div class="diary-card-preview">${escapeHtml(d.preview)}</div>
-              <div class="diary-card-footer">
-                <span class="reply-count">${d.replyCount > 0 ? '💌 ' + d.replyCount : ''}</span>
-                <span class="read-more">阅读全文 →</span>
+                <div class="diary-card-preview">${escapeHtml(d.preview)}</div>
+                <div class="diary-card-footer">
+                  <span class="reply-count">${d.replyCount > 0 ? '💌 ' + d.replyCount : ''}</span>
+                  <span class="read-more">阅读全文 →</span>
+                </div>
               </div>
             </div>
           `;
