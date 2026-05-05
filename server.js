@@ -156,6 +156,18 @@ function getSeasonKey(month) {
   return 'winter';
 }
 
+function getPreviousDiary(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  for (let i = 1; i <= 7; i++) {
+    const prev = new Date(d);
+    prev.setDate(prev.getDate() - i);
+    const prevStr = prev.toISOString().split('T')[0];
+    const diary = readDiary(prevStr);
+    if (diary) return diary;
+  }
+  return null;
+}
+
 async function generateDiaryWithAI(dateStr, userMood = null, userEvent = null, userFood = null) {
   const info = getDateInfo(dateStr);
   const recentDiaries = getRecentDiaries(3);
@@ -163,11 +175,12 @@ async function generateDiaryWithAI(dateStr, userMood = null, userEvent = null, u
     `[${d.date}] ${d.content.substring(0, 150)}...`
   ).join('\n\n');
 
-  const recentReplies = recentDiaries
-    .filter(d => d.replies && d.replies.length > 0)
-    .flatMap(d => d.replies.map(r => r.content));
-  const replyContext = recentReplies.length > 0
-    ? `\n\n读者之前给虹夏的回复（虹夏需要在日记中回应最新的回复）:\n${recentReplies.map(r => `- "${r}"`).join('\n')}`
+  const prevDiary = getPreviousDiary(dateStr);
+  const previousDayReplies = (prevDiary && prevDiary.replies && prevDiary.replies.length > 0)
+    ? prevDiary.replies.map(r => r.content)
+    : [];
+  const replyContext = previousDayReplies.length > 0
+    ? `\n\n读者在上一篇日记给虹夏的回复（虹夏需要在今天的日记中回应）:\n${previousDayReplies.map(r => `- "${r}"`).join('\n')}`
     : '';
 
   const systemPrompt = `你是「虹夏」，高中一年级学生，结束乐队的鼓手兼队长。
