@@ -74,6 +74,14 @@ node server.js
 | 模型名称 | 使用的 AI 模型 | `mimo-v2.5-pro` |
 | TTS 端口 | 本地 TTS 语音服务端口 | `5000` |
 
+### ⚙️ TTS 配置
+
+通过侧边栏底部的「TTS 配置设置」按钮或直接编辑 `config.json`：
+下载链接：https://pan.quark.cn/s/06f314006993, 打开..01 启动API服务.bat即可启动TTS服务端
+| 配置项 | 说明 | 默认值 |
+|---|---|---|
+| TTS 服务地址 | 本地 TTS 语音服务的接口地址 | `http://localhost:5000` |
+
 ### 📊 数据统计
 
 侧边栏显示：
